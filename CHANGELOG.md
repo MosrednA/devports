@@ -14,6 +14,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Forced process-tree termination by port, PID, or displayed index.
 - Multi-index termination with PID deduplication.
 - Browser opening for localhost ports.
+- Safe self-updates for source-linked installations.
 - Reusable TypeScript API.
 - Windows CI for Node.js 22 and 24.
 - Safety checks for non-Node PID termination.

@@ -37,6 +37,7 @@ function createHarness(options: HarnessOptions = {}) {
   const errors: string[] = [];
   const writes: string[] = [];
   const exitCodes: number[] = [];
+  const updateSteps: string[] = [];
 
   const dependencies: CliDependencies = {
     scanNodePorts: async () => options.processes ?? processes,
@@ -47,6 +48,17 @@ function createHarness(options: HarnessOptions = {}) {
       return { stdout: "", stderr: "" };
     },
     openLocalhost: async (port) => `http://localhost:${port}`,
+    updateDevports: async (onStep) => {
+      for (const step of ["pull", "install", "build"] as const) {
+        updateSteps.push(step);
+        onStep(step);
+      }
+      return {
+        updated: true,
+        beforeCommit: "1111111",
+        afterCommit: "2222222",
+      };
+    },
   };
   const io: CliIo = {
     log: (message) => logs.push(message),
@@ -62,6 +74,7 @@ function createHarness(options: HarnessOptions = {}) {
     errors,
     writes,
     exitCodes,
+    updateSteps,
   };
 }
 
@@ -156,4 +169,16 @@ test("missing port and PID targets set a failing exit code", async () => {
   await run(pidHarness, "kill-pid", "9999");
   assert.deepEqual(pidHarness.exitCodes, [1]);
   assert.match(pidHarness.errors[0], /No running process/);
+});
+
+test("update reports progress and keeps the existing link", async () => {
+  const harness = createHarness();
+  await run(harness, "update");
+
+  assert.deepEqual(harness.updateSteps, ["pull", "install", "build"]);
+  assert.match(
+    harness.logs.join("\n"),
+    /Updated devports \(1111111 → 2222222\)/,
+  );
+  assert.match(harness.logs.join("\n"), /existing npm link remains active/);
 });
