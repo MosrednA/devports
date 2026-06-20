@@ -42,6 +42,7 @@ export async function killProcessTree(
     throw new Error(
       `Could not kill PID ${pid}. It may be running as administrator.\n` +
         `Try running this terminal as administrator, or use Task Manager.${suffix}`,
+      { cause: error },
     );
   }
 }
