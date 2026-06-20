@@ -18,15 +18,10 @@ Find and stop Node.js development servers by port, PID, or list index.
 - Opens `http://localhost:<port>` in the default browser.
 - Provides stable JSON output for scripts and future desktop integrations.
 
-## Install
+## Use from source
 
-From npm after the first release:
-
-```powershell
-npm install --global @mosredna/devports
-```
-
-From source:
+`devports` is not published to the npm registry. Clone the repository and link
+the command locally:
 
 ```powershell
 git clone https://github.com/MosrednA/devports.git
@@ -36,11 +31,28 @@ npm run build
 npm link
 ```
 
-Both command names are available:
+This installs both command names globally for the current Node.js installation:
 
 ```powershell
 devports
 devport
+```
+
+To update later:
+
+```powershell
+cd devports
+git pull --ff-only
+npm ci
+npm run build
+```
+
+Relinking is not required unless the package name or command entries change.
+
+To remove the linked commands:
+
+```powershell
+npm unlink --global @mosredna/devports
 ```
 
 ## Usage
