@@ -9,6 +9,7 @@ test("updateDevports pulls, installs, and builds in order", async () => {
 
   const result = await updateDevports({
     projectRoot: "C:\\devports",
+    platform: "win32",
     pathExists: () => true,
     onStep: (step) => steps.push(step),
     runner: async (executable, args, cwd) => {
@@ -52,6 +53,7 @@ test("updateDevports refuses local changes before pulling", async () => {
   await assert.rejects(
     updateDevports({
       projectRoot: "C:\\devports",
+      platform: "win32",
       pathExists: () => true,
       runner: async (executable, args) => {
         calls.push(`${executable} ${args.join(" ")}`);
@@ -68,8 +70,47 @@ test("updateDevports requires a linked Git checkout", async () => {
   await assert.rejects(
     updateDevports({
       projectRoot: "C:\\not-a-checkout",
+      platform: "win32",
       pathExists: () => false,
     }),
     /not a linked Git checkout/,
   );
+});
+
+test("updateDevports uses native Linux command names", async () => {
+  const calls: string[] = [];
+  let revisionReads = 0;
+
+  await updateDevports({
+    projectRoot: "/home/user/devports",
+    platform: "linux",
+    pathExists: () => true,
+    runner: async (executable, args) => {
+      calls.push(`${executable} ${args.join(" ")}`);
+      if (args[0] === "status") {
+        return { stdout: "", stderr: "" };
+      }
+      if (args[0] === "branch") {
+        return { stdout: "main\n", stderr: "" };
+      }
+      if (args[0] === "rev-parse") {
+        revisionReads += 1;
+        return {
+          stdout: revisionReads === 1 ? "1111111\n" : "1111111\n",
+          stderr: "",
+        };
+      }
+      return { stdout: "", stderr: "" };
+    },
+  });
+
+  assert.deepEqual(calls, [
+    "git status --porcelain",
+    "git branch --show-current",
+    "git rev-parse HEAD",
+    "git pull --ff-only",
+    "npm ci",
+    "npm run build",
+    "git rev-parse HEAD",
+  ]);
 });

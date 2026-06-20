@@ -10,8 +10,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Added
 
 - Windows PowerShell discovery of Node.js TCP listeners.
+- Linux and WSL discovery through `ss` and `/proc`.
 - Table, JSON, and raw scanner output.
 - Forced process-tree termination by port, PID, or displayed index.
+- Linux process-tree termination using `SIGKILL` or `SIGTERM`.
 - Multi-index termination with PID deduplication.
 - Browser opening for localhost ports.
 - Safe self-updates for source-linked installations.

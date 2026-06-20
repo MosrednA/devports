@@ -56,10 +56,15 @@ test("taskkillArguments adds /F only in force mode", () => {
 
 test("killProcessTree defaults to forced termination", async () => {
   let receivedArgs: string[] = [];
-  await killProcessTree(123, undefined, async (_executable, args) => {
-    receivedArgs = args;
-    return { stdout: "", stderr: "" };
-  });
+  await killProcessTree(
+    123,
+    undefined,
+    async (_executable, args) => {
+      receivedArgs = args;
+      return { stdout: "", stderr: "" };
+    },
+    "win32",
+  );
 
   assert.deepEqual(receivedArgs, ["/PID", "123", "/T", "/F"]);
 });

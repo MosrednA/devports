@@ -11,13 +11,16 @@ export type NodePortProcess = {
   projectName?: string | null;
 };
 
-export type WindowsProcess = {
+export type ProcessInfo = {
   pid: number;
   processName: string;
   command: string | null;
   executablePath: string | null;
   parentProcessId: number | null;
 };
+
+/** @deprecated Use ProcessInfo instead. */
+export type WindowsProcess = ProcessInfo;
 
 export type CommandResult = {
   stdout: string;

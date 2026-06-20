@@ -4,9 +4,9 @@ Contributions are welcome.
 
 ## Requirements
 
-- Windows 10 or Windows 11
+- Windows 10/11, Linux, or WSL
 - Node.js 22 or newer
-- Windows PowerShell
+- Windows PowerShell on Windows, or `ss` from `iproute2` on Linux
 
 ## Development
 

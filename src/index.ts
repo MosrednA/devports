@@ -1,15 +1,29 @@
 export { formatProcessDetails, formatTable } from "./format";
-export { killProcessTree, taskkillArguments } from "./kill";
-export { openLocalhost } from "./open";
+export { findDescendants, killLinuxProcessTree } from "./linux/kill";
 export {
-  createUrl,
+  parseSsOutput,
+  readLinuxProcess,
+  scanLinuxNodePorts,
+  scanLinuxNodePortsRaw,
+} from "./linux/scanner";
+export { killProcessTree, taskkillArguments } from "./kill";
+export { getOpenCommand, openLocalhost } from "./open";
+export { getSupportedPlatform, isWsl } from "./platform";
+export type { SupportedPlatform } from "./platform";
+export {
   getProcessByPid,
   parseNodePortOutput,
   parseProcessOutput,
   scanNodePorts,
   scanNodePortsRaw,
 } from "./scanner";
-export type { CommandResult, NodePortProcess, WindowsProcess } from "./types";
+export { createUrl } from "./url";
+export type {
+  CommandResult,
+  NodePortProcess,
+  ProcessInfo,
+  WindowsProcess,
+} from "./types";
 export { parseIndexes, parsePid, parsePort } from "./validation";
 export { updateDevports } from "./update";
 export type { UpdateOptions, UpdateResult, UpdateStep } from "./update";

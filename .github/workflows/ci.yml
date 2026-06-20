@@ -10,12 +10,24 @@ permissions:
 
 jobs:
   test:
-    name: Node.js ${{ matrix.node }}
-    runs-on: windows-latest
+    name: ${{ matrix.os-name }} / Node.js ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        node: [22, 24]
+        include:
+          - os: windows-latest
+            os-name: Windows
+            node: 22
+          - os: windows-latest
+            os-name: Windows
+            node: 24
+          - os: ubuntu-latest
+            os-name: Linux
+            node: 22
+          - os: ubuntu-latest
+            os-name: Linux
+            node: 24
 
     steps:
       - uses: actions/checkout@v7

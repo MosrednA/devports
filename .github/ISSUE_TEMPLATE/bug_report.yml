@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        devports is Windows-only. Do not include secrets or private command-line arguments.
+        devports supports Windows, Linux, and WSL. Do not include secrets or private command-line arguments.
 
   - type: input
     id: version
@@ -17,10 +17,10 @@ body:
       required: true
 
   - type: input
-    id: windows
+    id: operating-system
     attributes:
-      label: Windows version
-      placeholder: Windows 11 24H2
+      label: Operating system
+      placeholder: Windows 11 24H2, Ubuntu 24.04, or WSL 2 Ubuntu
     validations:
       required: true
 
