@@ -41,13 +41,21 @@ devport
 To update later:
 
 ```powershell
+devports update
+```
+
+The update command refuses to overwrite local changes. It pulls with
+`--ff-only`, refreshes dependencies, rebuilds the project, and keeps the
+existing global link active.
+
+Manual equivalent:
+
+```powershell
 cd devports
 git pull --ff-only
 npm ci
 npm run build
 ```
-
-Relinking is not required unless the package name or command entries change.
 
 To remove the linked commands:
 
@@ -130,6 +138,7 @@ devports k <indexes...> [--no-force]
 devports kill <port> [--no-force]
 devports kill-pid <pid> [--yes] [--no-force]
 devports open <port>
+devports update
 devports version
 ```
 

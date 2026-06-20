@@ -5,6 +5,7 @@ import { killProcessTree } from "./kill";
 import { openLocalhost } from "./open";
 import { getProcessByPid, scanNodePorts, scanNodePortsRaw } from "./scanner";
 import type { NodePortProcess, WindowsProcess } from "./types";
+import { updateDevports, type UpdateStep } from "./update";
 import { parseIndexes, parsePid, parsePort } from "./validation";
 
 type ListOptions = {
@@ -26,6 +27,11 @@ export type CliDependencies = {
     force?: boolean,
   ) => Promise<{ stdout: string; stderr: string }>;
   openLocalhost: (port: number) => Promise<string>;
+  updateDevports: (onStep: (step: UpdateStep) => void) => Promise<{
+    updated: boolean;
+    beforeCommit: string;
+    afterCommit: string;
+  }>;
 };
 
 export type CliIo = {
@@ -41,6 +47,7 @@ const defaultDependencies: CliDependencies = {
   getProcessByPid,
   killProcessTree,
   openLocalhost,
+  updateDevports: (onStep) => updateDevports({ onStep }),
 };
 
 const defaultIo: CliIo = {
@@ -288,6 +295,31 @@ export function createProgram(
     .command("version")
     .description("show the installed devports version")
     .action(() => io.log(version));
+
+  program
+    .command("update")
+    .description("update a source-linked devports installation")
+    .action(async () => {
+      const stepMessages: Record<UpdateStep, string> = {
+        pull: "Pulling the latest source...",
+        install: "Refreshing dependencies...",
+        build: "Building devports...",
+      };
+      const result = await dependencies.updateDevports((step) =>
+        io.log(stepMessages[step]),
+      );
+
+      if (result.updated) {
+        io.log(
+          pc.green(
+            `Updated devports (${result.beforeCommit.slice(0, 7)} → ${result.afterCommit.slice(0, 7)}).`,
+          ),
+        );
+      } else {
+        io.log(pc.green("devports is already up to date."));
+      }
+      io.log("The existing npm link remains active.");
+    });
 
   return program;
 }
