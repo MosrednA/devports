@@ -38,10 +38,13 @@ export async function runPowerShell(script: string): Promise<CommandResult> {
     if (cause.code === "ENOENT") {
       throw new Error(
         "Could not run PowerShell. This tool currently requires Windows PowerShell.",
+        { cause: error },
       );
     }
 
     const detail = cause.stderr?.trim() || cause.message;
-    throw new Error(`Could not scan Windows processes: ${detail}`);
+    throw new Error(`Could not scan Windows processes: ${detail}`, {
+      cause: error,
+    });
   }
 }
