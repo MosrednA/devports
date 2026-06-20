@@ -1,7 +1,7 @@
 {
   "name": "@mosredna/devports",
   "version": "1.0.0",
-  "description": "List, open, and safely stop Node.js development servers on Windows.",
+  "description": "List, open, and safely stop Node.js development servers on Windows and Linux.",
   "author": "MosrednA <k.gaaikema@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -43,19 +43,22 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "test": "npm run build && tsc -p tsconfig.test.json && node --test .test-dist/**/*.test.js",
+    "test": "npm run build && tsc -p tsconfig.test.json && node --test \".test-dist/**/*.test.js\"",
     "prepack": "npm run check"
   },
   "engines": {
     "node": ">=22"
   },
   "os": [
-    "win32"
+    "win32",
+    "linux"
   ],
   "keywords": [
     "node",
     "ports",
     "windows",
+    "linux",
+    "wsl",
     "development",
     "cli"
   ],

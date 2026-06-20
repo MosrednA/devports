@@ -1,5 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { killLinuxProcessTree } from "./linux/kill";
+import { getSupportedPlatform, type SupportedPlatform } from "./platform";
 import type { CommandResult } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -28,9 +30,10 @@ export async function killProcessTree(
   pid: number,
   force = true,
   runner: TaskkillRunner = defaultTaskkillRunner,
+  platform: SupportedPlatform = getSupportedPlatform(),
 ): Promise<CommandResult> {
-  if (process.platform !== "win32") {
-    throw new Error("devports currently requires Windows.");
+  if (platform === "linux") {
+    return killLinuxProcessTree(pid, force);
   }
 
   try {

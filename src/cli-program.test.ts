@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createProgram, type CliDependencies, type CliIo } from "./cli-program";
-import type { NodePortProcess, WindowsProcess } from "./types";
+import type { NodePortProcess, ProcessInfo } from "./types";
 
 const processes: NodePortProcess[] = [
   {
@@ -28,7 +28,7 @@ const processes: NodePortProcess[] = [
 
 type HarnessOptions = {
   processes?: NodePortProcess[];
-  processByPid?: WindowsProcess | null;
+  processByPid?: ProcessInfo | null;
 };
 
 function createHarness(options: HarnessOptions = {}) {
@@ -157,6 +157,21 @@ test("kill-pid allows an acknowledged non-Node process", async () => {
 
   await run(harness, "kill-pid", "77", "--yes");
   assert.deepEqual(harness.killed, [{ pid: 77, force: true }]);
+});
+
+test("kill-pid recognizes Linux Node.js process names", async () => {
+  const harness = createHarness({
+    processByPid: {
+      pid: 88,
+      processName: "node",
+      command: "node server.js",
+      executablePath: "/usr/bin/node",
+      parentProcessId: 1,
+    },
+  });
+
+  await run(harness, "kill-pid", "88");
+  assert.deepEqual(harness.killed, [{ pid: 88, force: true }]);
 });
 
 test("missing port and PID targets set a failing exit code", async () => {

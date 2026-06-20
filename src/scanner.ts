@@ -1,4 +1,11 @@
-import type { NodePortProcess, WindowsProcess } from "./types";
+import {
+  readLinuxProcess,
+  scanLinuxNodePorts,
+  scanLinuxNodePortsRaw,
+} from "./linux/scanner";
+import { getSupportedPlatform } from "./platform";
+import type { NodePortProcess, ProcessInfo } from "./types";
+import { createUrl } from "./url";
 import { runPowerShell } from "./windows/powershell";
 import {
   getProcessByPidScript,
@@ -19,6 +26,8 @@ type PowerShellRunner = (
   script: string,
 ) => Promise<{ stdout: string; stderr: string }>;
 
+export { createUrl };
+
 function nullableString(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
@@ -26,17 +35,6 @@ function nullableString(value: unknown): string | null {
 function nullableNumber(value: unknown): number | null {
   const number = Number(value);
   return Number.isInteger(number) && number >= 0 ? number : null;
-}
-
-export function createUrl(address: string, port: number): string {
-  const localhostAddresses = new Set(["127.0.0.1", "::1", "0.0.0.0", "::"]);
-  const host = localhostAddresses.has(address)
-    ? "localhost"
-    : address.includes(":")
-      ? `[${address}]`
-      : address;
-
-  return `http://${host}:${port}`;
 }
 
 export function parseNodePortOutput(output: string): NodePortProcess[] {
@@ -101,6 +99,9 @@ export function parseNodePortOutput(output: string): NodePortProcess[] {
 export async function scanNodePorts(
   runner: PowerShellRunner = runPowerShell,
 ): Promise<NodePortProcess[]> {
+  if (getSupportedPlatform() === "linux") {
+    return scanLinuxNodePorts();
+  }
   const { stdout } = await runner(LIST_NODE_PORTS_SCRIPT);
   return parseNodePortOutput(stdout);
 }
@@ -108,11 +109,14 @@ export async function scanNodePorts(
 export async function scanNodePortsRaw(
   runner: PowerShellRunner = runPowerShell,
 ): Promise<string> {
+  if (getSupportedPlatform() === "linux") {
+    return scanLinuxNodePortsRaw();
+  }
   const { stdout } = await runner(LIST_NODE_PORTS_SCRIPT);
   return stdout;
 }
 
-export function parseProcessOutput(output: string): WindowsProcess | null {
+export function parseProcessOutput(output: string): ProcessInfo | null {
   if (!output.trim()) {
     return null;
   }
@@ -146,7 +150,10 @@ export function parseProcessOutput(output: string): WindowsProcess | null {
 export async function getProcessByPid(
   pid: number,
   runner: PowerShellRunner = runPowerShell,
-): Promise<WindowsProcess | null> {
+): Promise<ProcessInfo | null> {
+  if (getSupportedPlatform() === "linux") {
+    return readLinuxProcess(pid);
+  }
   const { stdout } = await runner(getProcessByPidScript(pid));
   return parseProcessOutput(stdout);
 }

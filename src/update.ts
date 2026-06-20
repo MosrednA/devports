@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
+import { getSupportedPlatform, type SupportedPlatform } from "./platform";
 import type { CommandResult } from "./types";
 
 const execFileAsync = promisify(execFile);
@@ -25,6 +26,7 @@ export type UpdateOptions = {
   runner?: UpdateRunner;
   pathExists?: (path: string) => boolean;
   onStep?: (step: UpdateStep) => void;
+  platform?: SupportedPlatform;
 };
 
 async function defaultRunner(
@@ -61,10 +63,7 @@ function commandError(error: unknown): string {
 export async function updateDevports(
   options: UpdateOptions = {},
 ): Promise<UpdateResult> {
-  if (process.platform !== "win32") {
-    throw new Error("devports currently requires Windows.");
-  }
-
+  const platform = options.platform ?? getSupportedPlatform();
   const projectRoot = options.projectRoot ?? resolve(__dirname, "..");
   const runner = options.runner ?? defaultRunner;
   const pathExists = options.pathExists ?? existsSync;
@@ -94,36 +93,35 @@ export async function updateDevports(
     }
   };
 
-  const status = await run("git.exe", ["status", "--porcelain"]);
+  const git = platform === "win32" ? "git.exe" : "git";
+  const npm = platform === "win32" ? "npm.cmd" : "npm";
+
+  const status = await run(git, ["status", "--porcelain"]);
   if (status.stdout.trim()) {
     throw new Error(
       "The devports checkout has local changes. Commit or discard them before updating.",
     );
   }
 
-  const branch = await run("git.exe", ["branch", "--show-current"]);
+  const branch = await run(git, ["branch", "--show-current"]);
   if (!branch.stdout.trim()) {
     throw new Error(
       "The devports checkout is in detached HEAD state. Switch to a branch before updating.",
     );
   }
 
-  const beforeCommit = (
-    await run("git.exe", ["rev-parse", "HEAD"])
-  ).stdout.trim();
+  const beforeCommit = (await run(git, ["rev-parse", "HEAD"])).stdout.trim();
 
   options.onStep?.("pull");
-  await run("git.exe", ["pull", "--ff-only"]);
+  await run(git, ["pull", "--ff-only"]);
 
   options.onStep?.("install");
-  await run("npm.cmd", ["ci"]);
+  await run(npm, ["ci"]);
 
   options.onStep?.("build");
-  await run("npm.cmd", ["run", "build"]);
+  await run(npm, ["run", "build"]);
 
-  const afterCommit = (
-    await run("git.exe", ["rev-parse", "HEAD"])
-  ).stdout.trim();
+  const afterCommit = (await run(git, ["rev-parse", "HEAD"])).stdout.trim();
 
   return {
     beforeCommit,
