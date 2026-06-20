@@ -4,7 +4,7 @@ import { formatProcessDetails, formatTable } from "./format";
 import { killProcessTree } from "./kill";
 import { openLocalhost } from "./open";
 import { getProcessByPid, scanNodePorts, scanNodePortsRaw } from "./scanner";
-import type { NodePortProcess, WindowsProcess } from "./types";
+import type { NodePortProcess, ProcessInfo } from "./types";
 import { updateDevports, type UpdateStep } from "./update";
 import { parseIndexes, parsePid, parsePort } from "./validation";
 
@@ -21,7 +21,7 @@ type KillOptions = {
 export type CliDependencies = {
   scanNodePorts: () => Promise<NodePortProcess[]>;
   scanNodePortsRaw: () => Promise<string>;
-  getProcessByPid: (pid: number) => Promise<WindowsProcess | null>;
+  getProcessByPid: (pid: number) => Promise<ProcessInfo | null>;
   killProcessTree: (
     pid: number,
     force?: boolean,
@@ -61,6 +61,10 @@ const defaultIo: CliIo = {
 
 function shouldForceKill(options: KillOptions): boolean {
   return options.force !== false;
+}
+
+function isRecognizedNodeProcess(processName: string): boolean {
+  return ["node", "nodejs", "node.exe"].includes(processName.toLowerCase());
 }
 
 function addKillOptions(command: Command, includeYes = false): Command {
@@ -215,7 +219,7 @@ export function createProgram(
       return;
     }
 
-    const isNode = found.processName.toLowerCase() === "node.exe";
+    const isNode = isRecognizedNodeProcess(found.processName);
     if (!isNode && !options.yes) {
       throw new Error(
         `PID ${pid} is ${found.processName}, not a recognized Node.js process. ` +
@@ -249,7 +253,7 @@ export function createProgram(
   program
     .name("devports")
     .description(
-      "Find and manage Node.js processes listening on Windows TCP ports.",
+      "Find and manage Node.js processes listening on local TCP ports.",
     )
     .version(version)
     .showHelpAfterError()
