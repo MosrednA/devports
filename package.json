@@ -2,7 +2,7 @@
   "name": "@mosredna/devports",
   "version": "1.0.0",
   "description": "List, open, and safely stop Node.js development servers on Windows and Linux.",
-  "author": "MosrednA <k.gaaikema@gmail.com>",
+  "author": "MosrednA (https://github.com/MosrednA)",
   "license": "MIT",
   "repository": {
     "type": "git",
