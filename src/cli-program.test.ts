@@ -126,6 +126,47 @@ test("invalid indexes fail before any process is killed", async () => {
   assert.deepEqual(harness.killed, []);
 });
 
+test("kill-all refuses to terminate anything without --yes", async () => {
+  const harness = createHarness();
+
+  await assert.rejects(
+    run(harness, "kill-all"),
+    /kill-all would terminate 2 Node\.js process tree\(s\)/,
+  );
+  assert.deepEqual(harness.killed, []);
+});
+
+test("kill-all terminates every listed process once confirmed", async () => {
+  const harness = createHarness();
+  await run(harness, "kill-all", "--yes");
+
+  assert.deepEqual(harness.killed, [
+    { pid: 101, force: true },
+    { pid: 202, force: true },
+  ]);
+});
+
+test("kill-all honors --no-force and kills each PID once", async () => {
+  const harness = createHarness({
+    processes: [processes[0], { ...processes[1], pid: 101 }],
+  });
+  await run(harness, "kill-all", "--yes", "--no-force");
+
+  assert.deepEqual(harness.killed, [{ pid: 101, force: false }]);
+});
+
+test("kill-all succeeds when nothing is listening", async () => {
+  const harness = createHarness({ processes: [] });
+  await run(harness, "kill-all", "--yes");
+
+  assert.deepEqual(harness.killed, []);
+  assert.deepEqual(harness.exitCodes, []);
+  assert.match(
+    harness.logs.join("\n"),
+    /No listening Node\.js processes found/,
+  );
+});
+
 test("kill-pid refuses non-Node processes without --yes", async () => {
   const harness = createHarness({
     processByPid: {

@@ -18,6 +18,11 @@ type KillOptions = {
   yes?: boolean;
 };
 
+type SelectedProcess = {
+  index: number;
+  process: NodePortProcess;
+};
+
 export type CliDependencies = {
   scanNodePorts: () => Promise<NodePortProcess[]>;
   scanNodePortsRaw: () => Promise<string>;
@@ -67,16 +72,13 @@ function isRecognizedNodeProcess(processName: string): boolean {
   return ["node", "nodejs", "node.exe"].includes(processName.toLowerCase());
 }
 
-function addKillOptions(command: Command, includeYes = false): Command {
+function addKillOptions(command: Command, yesDescription?: string): Command {
   command
     .option("-f, --force", "force termination with taskkill /F (default)", true)
     .option("--no-force", "try termination without taskkill /F");
 
-  if (includeYes) {
-    command.option(
-      "-y, --yes",
-      "allow killing a PID that is not recognized as Node.js",
-    );
+  if (yesDescription) {
+    command.option("-y, --yes", yesDescription);
   }
 
   return command;
@@ -143,6 +145,52 @@ export function createProgram(
     io.log(pc.green("\nSUCCESS: Sent termination signal to process tree."));
   }
 
+  function uniqueSelectionByPid(
+    selected: SelectedProcess[],
+  ): SelectedProcess[] {
+    return [
+      ...new Map(selected.map((item) => [item.process.pid, item])).values(),
+    ];
+  }
+
+  async function killSelected(
+    selected: SelectedProcess[],
+    options: KillOptions,
+  ): Promise<void> {
+    io.log(`Killing ${selected.length} Node.js process tree(s)\n`);
+    for (const item of selected) {
+      io.log(
+        `#${item.index}  Port ${item.process.port}  PID ${item.process.pid}  ` +
+          `${item.process.command || "<unavailable>"}`,
+      );
+    }
+
+    const failures: string[] = [];
+    for (const item of selected) {
+      try {
+        await dependencies.killProcessTree(
+          item.process.pid,
+          shouldForceKill(options),
+        );
+        io.log(
+          pc.green(
+            `SUCCESS: Killed #${item.index} (port ${item.process.port}, PID ${item.process.pid}).`,
+          ),
+        );
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        failures.push(`#${item.index}: ${message}`);
+        io.error(pc.red(`FAILED: #${item.index} (PID ${item.process.pid}).`));
+      }
+    }
+
+    if (failures.length > 0) {
+      throw new Error(
+        `${failures.length} selected process tree(s) could not be killed.\n${failures.join("\n")}`,
+      );
+    }
+  }
+
   async function killByIndexes(
     indexesValue: string[],
     options: KillOptions,
@@ -168,42 +216,34 @@ export function createProgram(
       index,
       process: processes[index - 1],
     }));
-    const uniqueByPid = [
-      ...new Map(selected.map((item) => [item.process.pid, item])).values(),
-    ];
 
-    io.log(`Killing ${uniqueByPid.length} Node.js process tree(s)\n`);
-    for (const item of uniqueByPid) {
-      io.log(
-        `#${item.index}  Port ${item.process.port}  PID ${item.process.pid}  ` +
-          `${item.process.command || "<unavailable>"}`,
-      );
+    await killSelected(uniqueSelectionByPid(selected), options);
+  }
+
+  async function killAll(options: KillOptions): Promise<void> {
+    const processes = await dependencies.scanNodePorts();
+
+    if (processes.length === 0) {
+      io.log("No listening Node.js processes found.");
+      return;
     }
 
-    const failures: string[] = [];
-    for (const item of uniqueByPid) {
-      try {
-        await dependencies.killProcessTree(
-          item.process.pid,
-          shouldForceKill(options),
-        );
-        io.log(
-          pc.green(
-            `SUCCESS: Killed #${item.index} (port ${item.process.port}, PID ${item.process.pid}).`,
-          ),
-        );
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        failures.push(`#${item.index}: ${message}`);
-        io.error(pc.red(`FAILED: #${item.index} (PID ${item.process.pid}).`));
-      }
-    }
+    const selected = uniqueSelectionByPid(
+      processes.map((process, position) => ({
+        index: position + 1,
+        process,
+      })),
+    );
 
-    if (failures.length > 0) {
+    if (!options.yes) {
+      io.log(formatTable(processes));
       throw new Error(
-        `${failures.length} selected process tree(s) could not be killed.\n${failures.join("\n")}`,
+        `kill-all would terminate ${selected.length} Node.js process tree(s). ` +
+          `Re-run with --yes to confirm.`,
       );
     }
+
+    await killSelected(selected, options);
   }
 
   async function killByPid(
@@ -283,8 +323,15 @@ export function createProgram(
       .command("kill-pid")
       .description("kill a process tree by PID")
       .argument("<pid>", "process ID"),
-    true,
+    "allow killing a PID that is not recognized as Node.js",
   ).action(killByPid);
+
+  addKillOptions(
+    program
+      .command("kill-all")
+      .description("kill every listed Node.js process"),
+    "confirm killing every listed Node.js process",
+  ).action(killAll);
 
   program
     .command("open")
