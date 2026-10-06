@@ -167,6 +167,34 @@ test("kill-all succeeds when nothing is listening", async () => {
   );
 });
 
+test("nuke kills everything without a confirmation flag", async () => {
+  const harness = createHarness();
+  await run(harness, "nuke");
+
+  assert.deepEqual(harness.killed, [
+    { pid: 101, force: true },
+    { pid: 202, force: true },
+  ]);
+});
+
+test("nuke honors --no-force", async () => {
+  const harness = createHarness();
+  await run(harness, "nuke", "--no-force");
+
+  assert.deepEqual(harness.killed, [
+    { pid: 101, force: false },
+    { pid: 202, force: false },
+  ]);
+});
+
+test("nuke succeeds when nothing is listening", async () => {
+  const harness = createHarness({ processes: [] });
+  await run(harness, "nuke");
+
+  assert.deepEqual(harness.killed, []);
+  assert.deepEqual(harness.exitCodes, []);
+});
+
 test("kill-pid refuses non-Node processes without --yes", async () => {
   const harness = createHarness({
     processByPid: {

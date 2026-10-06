@@ -333,6 +333,12 @@ export function createProgram(
     "confirm killing every listed Node.js process",
   ).action(killAll);
 
+  addKillOptions(
+    program
+      .command("nuke")
+      .description("kill every listed Node.js process without confirmation"),
+  ).action(async (options: KillOptions) => killAll({ ...options, yes: true }));
+
   program
     .command("open")
     .description("open a localhost port in the default browser")
