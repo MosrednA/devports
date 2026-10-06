@@ -11,6 +11,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 - `kill-all` command that terminates every listed Node.js process, guarded by a
   required `--yes` confirmation.
+- `nuke` command that terminates every listed Node.js process immediately,
+  without a confirmation flag.
 
 ## [1.0.0] - 2026-06-20
 

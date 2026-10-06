@@ -124,6 +124,12 @@ devports kill-all --yes
 Without `--yes`, `kill-all` prints the processes it would terminate and exits
 without killing anything.
 
+`nuke` does the same thing with no confirmation flag at all:
+
+```text
+devports nuke
+```
+
 Stop the Node.js process listening on a port:
 
 ```text
@@ -180,6 +186,7 @@ devports list [--json | --raw]
 devports k <indexes...> [--no-force]
 devports kill <port> [--no-force]
 devports kill-all [--yes] [--no-force]
+devports nuke [--no-force]
 devports kill-pid <pid> [--yes] [--no-force]
 devports open <port>
 devports update
@@ -189,8 +196,10 @@ devports version
 ## Safety
 
 - `kill <port>` only terminates a PID verified as Node.js.
-- `k` and `kill-all` only target entries returned by the Node.js listener scan.
+- `k`, `kill-all`, and `nuke` only target entries returned by the Node.js
+  listener scan.
 - `kill-all` requires `--yes`; without it, it only previews the targets.
+- `nuke` terminates every listed process immediately with no confirmation.
 - All indexes are validated before any selected process is terminated.
 - Duplicate rows for the same PID are terminated only once.
 - Linux descendants are enumerated through `/proc` and terminated deepest-first;
