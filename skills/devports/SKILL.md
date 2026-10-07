@@ -1,10 +1,10 @@
 ---
 name: devports
 description:
-  Install and use the DevPorts CLI to inspect Node.js TCP listeners, resolve
-  EADDRINUSE conflicts, open localhost URLs, and stop development servers on
-  Windows, Linux, or WSL. Use when a task involves identifying or cleaning up
-  local Node.js servers.
+  Use the DevPorts CLI to inspect Node.js TCP listeners, resolve EADDRINUSE
+  conflicts, open localhost URLs, and stop development servers on Windows,
+  Linux, or WSL. Use when a task involves identifying or cleaning up local
+  Node.js servers.
 ---
 
 # DevPorts
@@ -14,32 +14,9 @@ their process trees. It supports Windows 10/11, Linux, and WSL 1/2 with Node.js
 22 or newer. macOS is not supported. Each installation manages its own
 environment; WSL cannot manage Windows-host processes or another distribution.
 
-## Install the CLI
-
-Check an existing installation with `devports version`. If setup is needed,
-clone into a dedicated tools directory, using the user's chosen location when
-provided. Git is required; Linux and WSL also need `ss` from `iproute2`.
-
-Run these commands in PowerShell, Linux, or WSL from the parent tools directory:
-
-```sh
-git clone https://github.com/MosrednA/devports.git
-cd devports
-npm ci
-npm run build
-node bin/devports.js version
-node bin/devports.js list --json
-```
-
-DevPorts is not published to npm; do not use `npm install -g devports`. Keep an
-existing checkout rather than overwriting it. If `ss` is unavailable on Debian
-or Ubuntu, install it with `sudo apt install iproute2` when dependency setup is
-in scope.
-
-For global commands, run `npm link` from the checkout when global installation
-is requested. This creates both `devports` and `devport` for the active Node.js
-installation. Without a global link, replace `devports` in the examples below
-with `node /path/to/devports/bin/devports.js`, quoting paths containing spaces.
+This skill assumes DevPorts is installed. Setup is covered separately in the
+[AI installation guide](https://github.com/MosrednA/devports/blob/main/docs/ai-install.md).
+Use `devports` or its alias `devport` for the commands below.
 
 ## Inspect and select a target
 
