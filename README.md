@@ -10,7 +10,7 @@ A small CLI for Windows, Linux, and WSL.
 [![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-417e38)](https://nodejs.org/)
 [![MIT License](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
 
-[Usage guide](docs/usage.md) · [AI skill](skills/devports/SKILL.md) ·
+[Usage guide](docs/usage.md) · [AI assistants](#ai-assistants) ·
 [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) ·
 [Report a bug](https://github.com/MosrednA/devports/issues)
 
@@ -84,15 +84,17 @@ or processes in another distribution. macOS is not supported.
 
 ## AI assistants
 
-The [DevPorts skill](skills/devports/SKILL.md) explains installation, JSON
-output, target selection, and process cleanup. Give your assistant this prompt:
+| File                                        | Purpose                                                  |
+| ------------------------------------------- | -------------------------------------------------------- |
+| [Usage skill](skills/devports/SKILL.md)     | Teach an AI to inspect and manage DevPorts servers.      |
+| [AI installation guide](docs/ai-install.md) | Install both DevPorts and the usage skill for the agent. |
+
+To set up an AI assistant, give it this prompt:
 
 ```text
-Read https://raw.githubusercontent.com/MosrednA/devports/main/skills/devports/SKILL.md and use it to install and work with DevPorts.
+Read https://raw.githubusercontent.com/MosrednA/devports/main/docs/ai-install.md
+Install DevPorts and its usage skill for this AI agent.
 ```
-
-For agents that support `SKILL.md`, copy the `skills/devports` folder into the
-agent's configured skill directory.
 
 ## Development
 
