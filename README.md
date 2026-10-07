@@ -10,8 +10,8 @@ A small CLI for Windows, Linux, and WSL.
 [![Node.js 22+](https://img.shields.io/badge/Node.js-22%2B-417e38)](https://nodejs.org/)
 [![MIT License](https://img.shields.io/badge/License-MIT-64748b)](LICENSE)
 
-[Usage guide](docs/usage.md) · [Contributing](CONTRIBUTING.md) ·
-[Changelog](CHANGELOG.md) ·
+[Usage guide](docs/usage.md) · [AI skill](skills/devports/SKILL.md) ·
+[Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) ·
 [Report a bug](https://github.com/MosrednA/devports/issues)
 
 </div>
@@ -81,6 +81,18 @@ and all command options.
 Windows uses PowerShell; Linux and WSL require `ss` from `iproute2`. Each
 installation manages its own environment: WSL cannot stop Windows-host processes
 or processes in another distribution. macOS is not supported.
+
+## AI assistants
+
+The [DevPorts skill](skills/devports/SKILL.md) explains installation, JSON
+output, target selection, and process cleanup. Give your assistant this prompt:
+
+```text
+Read https://raw.githubusercontent.com/MosrednA/devports/main/skills/devports/SKILL.md and use it to install and work with DevPorts.
+```
+
+For agents that support `SKILL.md`, copy the `skills/devports` folder into the
+agent's configured skill directory.
 
 ## Development
 
