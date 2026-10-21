@@ -15,10 +15,11 @@ development.
 
 ## Ship
 
-`main` is protected, also for the owner: changes go through a pull request with
-linear history, and the four CI checks (Windows and Linux, Node.js 22 and 24)
-must pass. A direct push to `main` is rejected. Push a branch, open a pull
-request and rebase-merge it yourself once the checks pass; no review is needed.
+`main` is protected for other contributors: a pull request with linear history
+and the four CI checks (Windows and Linux, Node.js 22 and 24) passing. The owner
+may bypass this, so agents working for the owner commit and push straight to
+`main`; the "Bypassed rule violations" notice on push is expected. CI still runs
+on every push to `main`.
 
 ## Notes
 
