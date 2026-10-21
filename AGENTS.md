@@ -15,9 +15,10 @@ development.
 
 ## Ship
 
-`main` is protected: the four CI checks (Windows and Linux, Node.js 22 and 24)
-must pass first, so a direct push to `main` is rejected. Push a branch and open
-a pull request instead.
+`main` is protected, also for the owner: changes go through a pull request with
+linear history, and the four CI checks (Windows and Linux, Node.js 22 and 24)
+must pass. A direct push to `main` is rejected. Push a branch, open a pull
+request and rebase-merge it yourself once the checks pass; no review is needed.
 
 ## Notes
 
